@@ -1,33 +1,85 @@
+//SCRIPTED
+
+//DECLARATIVE
 pipeline {
-    agent any
+	agent any
+	// agent { docker { image 'maven:3.6.3'} }
+	// agent { docker { image 'node:13.8'} }
+	environment {
+		dockerHome = tool 'docker'
+		mavenHome = tool 'maven'
+		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+	}
 
-    tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-        maven "maven"
-    }
+	stages {
+		stage('Checkout') {
+			steps {
+				sh 'mvn --version'
+				sh 'docker version'
+				echo "Build"
+				echo "PATH - $PATH"
+				echo "BUILD_NUMBER - $env.BUILD_NUMBER"
+				echo "BUILD_ID - $env.BUILD_ID"
+				echo "JOB_NAME - $env.JOB_NAME"
+				echo "BUILD_TAG - $env.BUILD_TAG"
+				echo "BUILD_URL - $env.BUILD_URL"
+			}
+		}
+		stage('Compile') {
+			steps {
+				sh "mvn clean compile"
+			}
+		}
 
-    stages {
-        stage('Build') {
-            steps {
-                // Get some code from a GitHub repository
-                git 'https://github.com/ruprelasonal/jenkin_test.git'
+		stage('Test') {
+			steps {
+				sh "mvn test"
+			}
+		}
 
-                // Run Maven on a Unix agent.
-                 echo 'This is a minimal pipeline.'
-                sh "mvn package"
+		stage('Integration Test') {
+			steps {
+				sh "mvn failsafe:integration-test failsafe:verify"
+			}
+		}
 
-                // To run Maven on a Windows agent, use
-                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
-            }
+		stage('Package') {
+			steps {
+				sh "mvn package -DskipTests"
+			}
+		}
 
-            post {
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                    junit '**/target/surefire-reports/TEST-*.xml'
-                    archiveArtifacts 'target/*.jar'
-                }
-            }
-        }
-    }
+		stage('Build Docker Image') {
+			steps {
+				//"docker build -t in28min/currency-exchange-devops:$env.BUILD_TAG"
+				script {
+					dockerImage = docker.build("https://github.com/ruprelasonal/jenkin_test:${env.BUILD_TAG}")
+				}
+
+			}
+		}
+
+		stage('Push Docker Image') {
+			steps {
+				script {
+					docker.withRegistry('', 'dockerhub') {
+						dockerImage.push();
+						dockerImage.push('latest');
+					}
+				}
+			}
+		}
+	} 
+	
+	post {
+		always {
+			echo 'Im awesome. I run always'
+		}
+		success {
+			echo 'I run when you are successful'
+		}
+		failure {
+			echo 'I run when you fail'
+		}
+	}
 }
