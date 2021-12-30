@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-RestfulWebServicesApplication<docker-in-5-steps-todo-rest-api-h2>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.in28minutes.rest.webservices.restfulwebservices.RestfulWebServicesApplication",
+            "projectName": "docker-in-5-steps-todo-rest-api-h2",
+            "args": ""
+        }
+    ]
+}
