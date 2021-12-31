@@ -9,6 +9,8 @@ pipeline {
 		dockerHome = tool 'docker'
 		mavenHome = tool 'maven'
 		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+       
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
 	}
 
 	stages {
@@ -61,12 +63,13 @@ pipeline {
 
 		stage('Push Docker Image') {
 			steps {
-				script {
-					docker.withRegistry('', 'dockerhub') {
-						dockerImage.push();
-						dockerImage.push('latest');
-					}
-				}
+               sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+				// script {
+				// 	docker.withRegistry('', 'dockerhub') {
+				// 		dockerImage.push();
+				// 		dockerImage.push('latest');
+				// 	}
+				// }
 			}
 		}
 	} 
@@ -74,6 +77,7 @@ pipeline {
 	post {
 		always {
 			echo 'Im awesome. I run always'
+            sh 'docker logout'
 		}
 		success {
 			echo 'I run when you are successful'
