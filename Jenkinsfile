@@ -55,7 +55,7 @@ pipeline {
 			steps {
 				//"docker build -t in28min/currency-exchange-devops:$env.BUILD_TAG"
 				script {
-					dockerImage = docker.build("docker-in-5-steps-todo-rest-api-h3:5.0.0.RELEASE")
+					dockerImage = docker.build("ruprelasonal/docker-in-5-steps-todo-rest-api-h3:5.0.0.RELEASE")
 				}
 
 			}
