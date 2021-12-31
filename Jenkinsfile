@@ -53,7 +53,7 @@ pipeline {
 			steps {
 				//"docker build -t in28min/currency-exchange-devops:$env.BUILD_TAG"
 				script {
-					dockerImage = docker.build("https://github.com/ruprelasonal/jenkin_test")
+					dockerImage = docker.build("https://github.com/ruprelasonal/jenkin_test:${env.BUILD_TAG}")
 				}
 
 			}
@@ -62,7 +62,7 @@ pipeline {
 		stage('Push Docker Image') {
 			steps {
 				script {
-					docker.withRegistry('', 'dockerhub') {
+					docker.withRegistry('', 'dockerhub/ruprelasonal') {
 						dockerImage.push();
 						dockerImage.push('latest');
 					}
